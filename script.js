@@ -10,6 +10,7 @@ canvas.height = 500;
 let score = 0;
 let gameFrame = 0;
 ctx.font = '50px Georgia';
+let gameSpeed = 1;
 
 
 //mouse interactivity
@@ -69,12 +70,12 @@ class Player {
             ctx.lineTo(mouse.x, mouse.y);
             ctx.stroke();
         }
-        ctx.fillStyle = 'red';
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.closePath();
-        ctx.fillRect(this.x, this.y, this.radius, 10);
+        // ctx.fillStyle = 'red';
+        // ctx.beginPath();
+        // ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        // ctx.fill();
+        // ctx.closePath();
+        // ctx.fillRect(this.x, this.y, this.radius, 10);
 
         ctx.save()
         ctx.translate(this.x, this.y);
@@ -97,6 +98,8 @@ const player = new Player();
 
 //bubles
 const bubblesArray = [];
+const bubbleImage = new Image();
+bubbleImage.src = 'bubble.png'
 class Bubble {
     constructor() {
         this.x = Math.random() * canvas.width;
@@ -114,12 +117,13 @@ class Bubble {
         this.distance = Math.sqrt(dx * dx + dy * dy);
     }
     draw() {
-        ctx.fillStyle = 'blue';
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.closePath();
-        ctx.stroke();
+        // ctx.fillStyle = 'blue';
+        // ctx.beginPath();
+        // ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        // ctx.fill();
+        // ctx.closePath();
+        // ctx.stroke();
+        ctx.drawImage(bubbleImage, this.x - 65, this.y - 65, this.radius * 2.6, this.radius * 2.6)
     }
 }
 
@@ -137,12 +141,10 @@ function handleBubbles() {
         bubblesArray[i].update();
         bubblesArray[i].draw();
 
-    }
-    for (let i = 0; i < bubblesArray.length; i++) {
         if (bubblesArray[i].y < 0 - bubblesArray[i].radius * 2) {
             bubblesArray.splice(i, 1);
-        }
-        if (bubblesArray[i]) {
+            i--;
+        } else if (bubblesArray[i]) {
             if (bubblesArray[i]?.distance < bubblesArray[i]?.radius + player.radius) {
                 (console.log('collision'));
                 if (!bubblesArray[i].counted) {
@@ -156,6 +158,7 @@ function handleBubbles() {
                     score++;
                     bubblesArray[i].counted = true;
                     bubblesArray.splice(i, 1);
+                    i--;
                 }
 
             }
@@ -164,9 +167,31 @@ function handleBubbles() {
     }
 }
 
+//Repeating Backgrounds
+const background = new Image();
+background.src = 'background1.png';
+
+const BG = {
+    x1: 0,
+    x2: canvas.width,
+    y: 0,
+    width: canvas.width,
+    height: canvas.height,
+}
+
+function handleBackground() {
+    BG.x1 -= gameSpeed;
+    if (BG.x1 < -BG.width) BG.x1 = BG.width;
+    BG.x2 -= gameSpeed;
+    if (BG.x2 < -BG.width) BG.x2 = BG.width;
+    ctx.drawImage(background, BG.x1, BG.y, BG.width, BG.height);
+    ctx.drawImage(background, BG.x2, BG.y, BG.width, BG.height);
+}
+
 //animation loop
 function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    handleBackground();
     handleBubbles();
     player.update();
     player.draw();
@@ -176,3 +201,7 @@ function animate() {
     requestAnimationFrame(animate);
 }
 animate();
+
+window.addEventListener('resize', function () {
+    canvasPosition = canvas.getBoundingClientRect();
+})
